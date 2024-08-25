@@ -1,6 +1,6 @@
 # GalaxyWeather
 
-This template should help get you started developing with Vue 3 in Vite.
+Application to check the weather and weather forecast for a city Vue 3 in Vite.
 
 ## Requirements
 
