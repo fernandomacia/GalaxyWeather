@@ -1,7 +1,7 @@
 <template>
     <div>
-        <WeatherNow v-if="weatherData" :weatherData="weatherData" />
-        <WeatherForecast v-if="forecastData" :forecastData="forecastData" />
+        <WeatherNow v-if="view === 'current' && data" :data="data" />
+        <WeatherForecast v-if="view === 'forecast' && data" :data="data" />
     </div>
 </template>
   
@@ -11,7 +11,16 @@
   
     export default {
         components: { WeatherNow, WeatherForecast },
-        props: ['weatherData', 'forecastData']
+        props: {
+            data: {
+                type: Object,
+                required: true
+            },
+            view: {
+                type: String,
+                required: true
+            }
+        }
     };
 </script>
   

@@ -1,7 +1,7 @@
 <template>
-    <div v-if="forecastData">
+    <div v-if="data">
         <div class="weather-header">
-            <h2 class="principal-text">{{ forecastData.city.name }} {{ forecastData.city.country }}</h2>
+            <h2 class="principal-text">{{ data.city.name }} {{ data.city.country }}</h2>
         </div>
         <div class="forecast-container">
             <div v-for="(day, index) in processedDailyForecasts" :key="index" class="forecast-card">
@@ -58,7 +58,7 @@
     
     export default {
         components: { WeatherIcon, FontAwesomeIcon },
-        props: ['forecastData'],
+        props: ['data'],
         methods: {
             formatChartData(dayData) {
                 if (!Array.isArray(dayData)) {
@@ -92,10 +92,10 @@
         },
         computed: {
             processedDailyForecasts() {
-                if (!this.forecastData || !this.forecastData.list) return [];
+                if (!this.data || !this.data.list) return [];
         
                 // Agrupar datos por fecha
-                const groupedByDate = this.forecastData.list.reduce((acc, data) => {
+                const groupedByDate = this.data.list.reduce((acc, data) => {
                     const date = new Date(data.dt * 1000).toLocaleDateString();
                     const currentDate = new Date().toLocaleDateString();
             

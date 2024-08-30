@@ -4,10 +4,9 @@
             <h1 class="title">Weather at:</h1>
             <weather-display 
                 v-if="selectedCity" 
-                :key="selectedCity + (forecastData ? 'forecast' : 'current')" 
                 :city="selectedCity" 
-                :weatherData="weatherData" 
-                :forecastData="forecastData" />
+                :data="data" 
+                :view="view" />
             <div class="buttons">
                 <div class="mb-3">
                     <input v-model="newCity" type="text" class="form-control" placeholder="City..." @keyup.enter="handleEnterKey" />
@@ -16,8 +15,8 @@
                     {{ error }}
                 </div>
                 <div class="d-flex mb-4">
-                    <button class="btn flex-fill me-2" :class="{'btn-primary': !forecastData, 'btn-secondary': forecastData}" @click="showCurrentWeather">Now</button>
-                    <button class="btn flex-fill" :class="{'btn-primary': forecastData, 'btn-secondary': !forecastData}" @click="showForecast">Forecast</button>
+                    <button class="btn flex-fill me-2" :class="{'btn-primary': view === 'current', 'btn-secondary': view === 'forecast'}" @click="showCurrentWeather">Now</button>
+                    <button class="btn flex-fill" :class="{'btn-primary': view === 'forecast', 'btn-secondary': view === 'current'}" @click="showForecast">Forecast</button>
                 </div>
                 <city-list :cities="cities" @citySelected="selectCity" @cityRemoved="removeCity" />
             </div>
@@ -35,8 +34,7 @@ import { getWeatherByCity, getForecastByCity } from '@/services/weatherService';
 const newCity = ref('');
 const cities = ref(getCities());
 const selectedCity = ref(null);
-const weatherData = ref(null);
-const forecastData = ref(null);
+const data = ref(null);
 const error = ref('');
 const view = ref('current');
 
@@ -66,8 +64,7 @@ const removeCity = (city) => {
   cities.value = getCities();
   if (selectedCity.value === city) {
     selectedCity.value = null;
-    weatherData.value = null;
-    forecastData.value = null;
+    data.value = null;
   }
 };
 
@@ -79,14 +76,12 @@ const showCurrentWeather = async () => {
       const cityName = response.data.name;
       await addCity(cityName);
       selectedCity.value = cityName;
-      weatherData.value = response.data;
-      forecastData.value = null;
+      data.value = response.data;
       error.value = '';
       view.value = 'current';
     } catch (err) {
       error.value = 'City not found. Please try another one.';
-      weatherData.value = null;
-      forecastData.value = null;
+      data.value = null;
     }
   }
 };
@@ -100,16 +95,14 @@ const showForecast = async () => {
         const cityName = response.data.city.name;
         await addCity(cityName);
         selectedCity.value = cityName;
-        forecastData.value = response.data;
-        weatherData.value = null;
+        data.value = response.data;
         view.value = 'forecast';
       } else {
-        forecastData.value = null;
+        data.value = null;
       }
     } catch (err) {
       error.value = 'City not found. Please try another one.';
-      weatherData.value = null;
-      forecastData.value = null;
+      data.value = null;
     }
   }
 };

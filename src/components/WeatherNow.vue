@@ -1,19 +1,19 @@
 <template>
     <div class="weather-info">
         <div class="weather-header">
-            <h2 class="principal-text">{{ weatherData.name }} {{ weatherData.sys.country }}</h2>
+            <h2 class="principal-text">{{ data.name }} {{ data.sys.country }}</h2>
             <div class="weather-main">
                 <div class="weather-icon-container">
-                    <weather-icon :icon="weatherData.weather[0].icon" />
-                    <p class="weather-description">{{ weatherData.weather[0].description }}</p>
+                    <weather-icon :icon="data.weather[0].icon" />
+                    <p class="weather-description">{{ data.weather[0].description }}</p>
                 </div>
                 <div class="weather-temperature">
-                    <p class="temperature-text">{{ weatherData.main.temp }} °C</p>
+                    <p class="temperature-text">{{ data.main.temp }} °C</p>
                     <p>
                         <font-awesome-icon :icon="['fas', 'arrow-up']" />
-                        {{ weatherData.main.temp_max }} °C |
+                        {{ data.main.temp_max }} °C |
                         <font-awesome-icon :icon="['fas', 'arrow-down']" />
-                        {{ weatherData.main.temp_min }} °C
+                        {{ data.main.temp_min }} °C
                     </p>
                 </div>
             </div>
@@ -22,19 +22,19 @@
             <table>
                 <tr>
                     <th>Pressure:</th>
-                    <td>{{ weatherData.main.pressure }} hPa</td>
+                    <td>{{ data.main.pressure }} hPa</td>
                 </tr>
                 <tr>
                     <th>Humidity:</th>
-                    <td>{{ weatherData.main.humidity }} %</td>
+                    <td>{{ data.main.humidity }} %</td>
                 </tr>
                 <tr>
                     <th>Visibility:</th>
-                    <td>{{ weatherData.visibility.toLocaleString() }} m</td>
+                    <td>{{ data.visibility.toLocaleString() }} m</td>
                 </tr>
                 <tr>
                     <th>Wind:</th>
-                    <td>{{ weatherData.wind.speed }} m/s</td>
+                    <td>{{ data.wind.speed }} m/s</td>
                 </tr>
             </table>
         </div>
@@ -52,7 +52,7 @@
     export default {
         components: { WeatherIcon, FontAwesomeIcon },
         props: {
-            weatherData: {
+            data: {
                 type: Object,
                 required: true
             }
