@@ -34,85 +34,85 @@ import { getWeatherByCity, getForecastByCity } from '@/services/weatherService';
 const newCity = ref('');
 const cities = ref(getCities());
 const selectedCity = ref(null);
-const data = ref(null);
+const data = ref({});
 const error = ref('');
 const view = ref('current');
 
 const addCity = async (cityName) => {
-  if (cityName) {
-    if (!cities.value.includes(cityName)) {
-      saveCity(cityName);
-      cities.value = getCities();
-      newCity.value = '';
-      error.value = '';
+    if (cityName) {
+        if (!cities.value.includes(cityName)) {
+        saveCity(cityName);
+        cities.value = getCities();
+        newCity.value = '';
+        error.value = '';
+        }
     }
-  }
 };
 
 const selectCity = async (city) => {
-  selectedCity.value = city;
-  newCity.value = '';
-  if (view.value === 'current') {
-    await showCurrentWeather();
-  } else {
-    await showForecast();
-  }
+    selectedCity.value = city;
+    newCity.value = '';
+    if (view.value === 'current') {
+        await showCurrentWeather();
+    } else {
+        await showForecast();
+    }
 };
 
 const removeCity = (city) => {
-  removeCityStore(city);
-  cities.value = getCities();
-  if (selectedCity.value === city) {
-    selectedCity.value = null;
-    data.value = null;
+    removeCityStore(city);
+    cities.value = getCities();
+    if (selectedCity.value === city) {
+        selectedCity.value = null;
+        data.value = null;
   }
 };
 
 const showCurrentWeather = async () => {
-  const city = newCity.value.trim() || selectedCity.value;
-  if (city) {
-    try {
-      const response = await getWeatherByCity(city);
-      const cityName = response.data.name;
-      await addCity(cityName);
-      selectedCity.value = cityName;
-      data.value = response.data;
-      error.value = '';
-      view.value = 'current';
-    } catch (err) {
-      error.value = 'City not found. Please try another one.';
-      data.value = null;
-    }
+    const city = newCity.value.trim() || selectedCity.value;
+    if (city) {
+        try {
+        const response = await getWeatherByCity(city);
+        const cityName = response.data.name;
+        await addCity(cityName);
+        selectedCity.value = cityName;
+        data.value = response.data || {};
+        error.value = '';
+        view.value = 'current';
+        } catch (err) {
+        error.value = 'City not found. Please try another one.';
+        data.value = {};
+        }
   }
 };
 
 const showForecast = async () => {
-  const city = newCity.value.trim() || selectedCity.value;
-  if (city) {
-    try {
-      const response = await getForecastByCity(city);
-      if (response && response.data) {
-        const cityName = response.data.city.name;
-        await addCity(cityName);
-        selectedCity.value = cityName;
-        data.value = response.data;
-        view.value = 'forecast';
-      } else {
-        data.value = null;
-      }
-    } catch (err) {
-      error.value = 'City not found. Please try another one.';
-      data.value = null;
+    const city = newCity.value.trim() || selectedCity.value;
+    if (city) {
+        try {
+            const response = await getForecastByCity(city);
+            if (response && response.data) {
+                const cityName = response.data.city.name;
+                await addCity(cityName);
+                selectedCity.value = cityName;
+                data.value = response.data || {};
+                view.value = 'forecast';
+            } else {
+                data.value = {};
+            }
+        } catch (err) {
+        error.value = 'City not found. Please try another one.';
+        data.value = {};
+        }
     }
-  }
 };
 
 const handleEnterKey = () => {
-  if (view.value === 'current') {
-    showCurrentWeather();
-  } else if (view.value === 'forecast') {
-    showForecast();
-  }
+    if (view.value === 'current') {
+        showCurrentWeather();
+    } else if (view.value === 'forecast') {
+        showForecast();
+    }
 };
 </script>
 

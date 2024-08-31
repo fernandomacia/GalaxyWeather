@@ -58,76 +58,81 @@
     
     export default {
         components: { WeatherIcon, FontAwesomeIcon },
-        props: ['data'],
+        props: {
+            data: {
+                type: Object,
+                required: true
+            }
+        },
         methods: {
             formatChartData(dayData) {
                 if (!Array.isArray(dayData)) {
                     console.error('Expected an array but got:', dayData);
-                    return {
-                        labels: [],
-                        temperatures: [],
-                        windSpeeds: [],
-                        humidities: [],
-                        pressures: [],
-                    };
-                }
-            
-                const labels = dayData.map(data => {
-                    const date = new Date(data.dt * 1000);
-                    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit'});
-                });
-                const temperatures = dayData.map(data => data.main.temp);
-                const windSpeeds = dayData.map(data => data.wind.speed);
-                const humidities = dayData.map(data => data.main.humidity);
-                const pressures = dayData.map(data => data.main.pressure);
-    
+                    return this.initializeChartData();
+                }    
                 return {
-                    labels,
-                    temperatures,
-                    windSpeeds,
-                    humidities,
-                    pressures
+                    labels: dayData.map(data => this.formatTime(data.dt)),
+                    temperatures: this.extractData(dayData, 'main.temp'),
+                    windSpeeds: this.extractData(dayData, 'wind.speed'),
+                    humidities: this.extractData(dayData, 'main.humidity'),
+                    pressures: this.extractData(dayData, 'main.pressure'),
                 };
+            },
+            extractData(dayData, keyPath) {
+                return dayData.map(data => this.getNestedValue(data, keyPath));
+            },
+            getNestedValue(obj, keyPath) {
+                return keyPath.split('.').reduce((acc, key) => acc[key], obj);
+            },
+            formatTime(timestamp) {
+                return new Date(timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            },
+            initializeChartData() {
+                return {
+                    labels: [],
+                    temperatures: [],
+                    windSpeeds: [],
+                    humidities: [],
+                    pressures: [],
+                };
+            },
+            groupByDate(dataList) {
+                return dataList.reduce((acc, data) => {
+                    const date = new Date(data.dt * 1000).toLocaleDateString();
+                    const currentDate = new Date().toLocaleDateString();
+                    if (date !== currentDate) {
+                        acc[date] = acc[date] || [];
+                        acc[date].push(data);
+                    }
+                    return acc;
+                }, {});
+            },
+            getWeatherIcons(dayData) {
+                return dayData.map(data => data.weather[0].icon);
+            },
+            getMaxTemp(dayData) {
+                return Math.max(...this.extractData(dayData, 'main.temp_max'));
+            },
+            getMinTemp(dayData) {
+                return Math.min(...this.extractData(dayData, 'main.temp_min'));
             },
         },
         computed: {
             processedDailyForecasts() {
                 if (!this.data || !this.data.list) return [];
-        
-                // Agrupar datos por fecha
-                const groupedByDate = this.data.list.reduce((acc, data) => {
-                    const date = new Date(data.dt * 1000).toLocaleDateString();
-                    const currentDate = new Date().toLocaleDateString();
-            
-                    if (date !== currentDate) { // Excluir el día actual
-                        if (!acc[date]) {
-                        acc[date] = [];
-                        }
-                        acc[date].push(data);
-                    }
-                    return acc;
-                }, {});
-        
-                // Filtrar solo las tres primeras fechas
-                const futureDates = Object.keys(groupedByDate).sort().slice(0, 3);
 
-                const result = futureDates.map(date => {
+                const groupedByDate = this.groupByDate(this.data.list);
+                const futureDates = Object.keys(groupedByDate).sort().slice(0, 3);
+                return futureDates.map(date => {
                     const dayData = groupedByDate[date];
-                    const formattedData = this.formatChartData(dayData);
-                    const weatherIcons = dayData.map(data => {
-                        return data.weather[0].icon;
-                    });
-                    const maxTemp = Math.max(...dayData.map(data => data.main.temp_max));
-                    const minTemp = Math.min(...dayData.map(data => data.main.temp_min));
                     return {
                         date,
-                        weatherIcons,
-                        ...formattedData,
-                        maxTemp,
-                        minTemp
+                        weatherIcons: this.getWeatherIcons(dayData),
+                        ...this.formatChartData(dayData),
+                        maxTemp: this.getMaxTemp(dayData),
+                        minTemp: this.getMinTemp(dayData),
                     };
                 });
-                return result;
             }
         }
     };
